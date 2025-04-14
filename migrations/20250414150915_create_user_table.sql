@@ -1,6 +1,4 @@
--- Create users table to store user account information
--- This table handles basic user authentication and profile data
-
+-- Add migration script here
 CREATE TABLE `users` (
     `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `first_name` VARCHAR(255)    NOT NULL,
