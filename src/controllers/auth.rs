@@ -44,7 +44,10 @@ pub async fn sign_in(data: web::Json<SignUpRequest>) -> impl Responder {
 }
 
 #[post("/auth/create")]
-pub async fn create_user(data: web::Json<SignUpRequest>, pool: web::Data<MySqlPool>,) -> impl Responder {
+pub async fn create_user(
+    data: web::Json<SignUpRequest>,
+    pool: web::Data<MySqlPool>,
+) -> impl Responder {
     match create(&data, &pool).await {
         Ok(_) => HttpResponse::Ok().finish(),
         Err(e) => {
