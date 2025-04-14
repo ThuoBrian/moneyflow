@@ -1,6 +1,4 @@
--- Create categories table to store user-defined expense/income categories
--- Each category belongs to a user and tracks its own balance
-
+-- Add migration script here
 CREATE TABLE `categories` (
     `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id`     BIGINT UNSIGNED NOT NULL,
