@@ -1,11 +1,10 @@
 use crate::{AppState, db};
 use actix_web::{
-    HttpResponse, Responder, get, post,
-    web::{self, Data},
+    HttpResponse, Responder, post,
+    web::{self},
 };
 use serde::{Deserialize, Serialize};
-use sqlx::MySqlPool;
-use std::error::Error;
+
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SignUpRequest {
@@ -24,16 +23,16 @@ struct SignUpResponse {
     password: String,
 }
 
-#[post("/auth/sign-up")]
+#[post("/auth/signup")]
 pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>) -> impl Responder {
     let db = state.db.lock().await;
 
     if db::user::has_email(&db, &data.email).await {
         return HttpResponse::BadRequest().body("email already exists");
-    };
-    format!("sign up: {:?}", data);
+    }
 
-    HttpResponse::Ok().json(SignUpRequest {
+    HttpResponse::Ok().json(SignUpResponse {
+        id: 1, // Replace with actual ID generation logic
         first_name: data.first_name.clone(),
         last_name: data.last_name.clone(),
         email: data.email.clone(),
@@ -41,7 +40,7 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     })
 }
 
-#[post("/auth/sign-in")]
+#[post("/auth/signin")]
 pub async fn sign_in(data: web::Json<SignUpRequest>) -> impl Responder {
     HttpResponse::Ok().json(SignUpResponse {
         id: 1,
