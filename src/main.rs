@@ -14,9 +14,7 @@ pub struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
-    // Why? it helps to keep sensitive data out of your codebase
-    // and allows you to easily change configurations without modifying the code.
-    // Make sure to add `dotenvy` to your Cargo.toml dependencies.
+    // Why? it helps to keep sensitive data out of your codebase.
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL")
@@ -30,7 +28,6 @@ async fn main() -> std::io::Result<()> {
         db: Mutex::new(pool),
     });
 
-    
     println!("Server running at http://127.0.0.1:8080");
 
     HttpServer::new(move || {
@@ -38,7 +35,6 @@ async fn main() -> std::io::Result<()> {
             .app_data(state.clone())
             .service(controllers::auth::sign_in)
             .service(controllers::auth::sign_up)
-            .service(controllers::auth::create_user)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
