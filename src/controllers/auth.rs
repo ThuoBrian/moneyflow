@@ -5,13 +5,12 @@ use actix_web::{
 };
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SignUpRequest {
-    first_name: String,
-    last_name: String,
-    email: String,
-    password: String,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub password: String,
 }
 
 #[derive(Serialize)]
@@ -30,6 +29,9 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     if db::user::has_email(&db, &data.email).await {
         return HttpResponse::BadRequest().body("email already exists");
     }
+    db::user::create_user(&db, &data).await;
+
+    "Success".to_string();
 
     HttpResponse::Ok().json(SignUpResponse {
         id: 1, // Replace with actual ID generation logic
