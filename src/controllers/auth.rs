@@ -29,8 +29,9 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     let db = state.db.lock().await;
 
     if db::user::has_email(&db, &data.email).await {
-        return HttpResponse::BadRequest().body("Email already exists");
-    }
+        return HttpResponse::BadRequest().body("email already exists");
+    };
+    format!("sign up: {:?}", data);
 
     HttpResponse::Ok().json(SignUpRequest {
         first_name: data.first_name.clone(),

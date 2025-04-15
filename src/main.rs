@@ -21,9 +21,9 @@ async fn main() -> std::io::Result<()> {
     let database_url = env::var("DATABASE_URL")
         .expect("You must set the DB config path must be set `DATABASE_URL`");
 
-    let pool = sqlx::MySqlPool::connect(&database_url)
-        .await
-        .expect("Failed to connect to database, check your connection string");
+    // let pool = sqlx::MySqlPool::connect(&database_url)
+    //     .await
+    //     .expect("Failed to connect to database, check your connection string");
 
     let state = web::Data::new(AppState {
         db: Mutex::new(sqlx::MySqlPool::connect(&database_url).await.unwrap()),
