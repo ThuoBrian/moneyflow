@@ -18,8 +18,7 @@ async fn main() -> std::io::Result<()> {
     // Why? it helps to keep sensitive data out of your codebase.
     dotenv().ok();
 
-    let database_url = env::var("DATABASE_URL")
-        .expect("You must set the DB config path must be set `DATABASE_URL`");
+    let database_url = env::var("DATABASE_URL").expect("Check your db path config `DATABASE_URL`");
 
     let state = web::Data::new(AppState {
         db: Mutex::new(sqlx::MySqlPool::connect(&database_url).await.unwrap()),
