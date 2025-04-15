@@ -1,5 +1,6 @@
 //To access my project folders
 mod controllers;
+mod db;
 
 //To organise my crates
 use actix_web::{App, HttpServer, web};
@@ -25,7 +26,7 @@ async fn main() -> std::io::Result<()> {
         .expect("Failed to connect to database, check your connection string");
 
     let state = web::Data::new(AppState {
-        db: Mutex::new(pool),
+        db: Mutex::new(sqlx::MySqlPool::connect(&database_url).await.unwrap()),
     });
 
     println!("Server running at http://127.0.0.1:8080");
@@ -35,6 +36,8 @@ async fn main() -> std::io::Result<()> {
             .app_data(state.clone())
             .service(controllers::auth::sign_in)
             .service(controllers::auth::sign_up)
+            .service(controllers::me::get_profile)
+            .service(controllers::me::update_user_profile)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
