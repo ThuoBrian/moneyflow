@@ -1,5 +1,4 @@
-use crate::controllers::auth::{SignUpRequest, SignUpResponse};
-
+use crate::controllers::auth::SignUpRequest;
 
 pub async fn has_email(db: &sqlx::MySqlPool, email: &str) -> bool {
     sqlx::query!("SELECT * FROM users WHERE email = ?", email)
@@ -9,16 +8,17 @@ pub async fn has_email(db: &sqlx::MySqlPool, email: &str) -> bool {
         .unwrap_or(false)
 }
 
-pub async fn create_user(db: &sqlx::MySqlPool, userinfo: &SignUpRequest) -> bool {
-    let encrypted_password = bcrypt::hash(&userinfo.password, bcrypt::DEFAULT_COST).unwrap();
+pub async fn create_user(db: &sqlx::MySqlPool, userinfo: &SignUpRequest) -> Result<(), sqlx::Error> {
+    let encrypted_password = bcrypt::hash(&userinfo.password, bcrypt::DEFAULT_COST)
+        .map_err(|_| sqlx::Error::Protocol("Password hashing failed".into()))?;
     sqlx::query!(
-        "INSERT INTO users (`first_name`, `last_name`, `email`,`password`) VALUES (?, ?, ?, ?)",
+        "INSERT INTO users (`first_name`, `last_name`, `email`, `password`) VALUES (?, ?, ?, ?)",
         &userinfo.first_name,
         &userinfo.last_name,
         &userinfo.email,
         &encrypted_password
     )
     .execute(db)
-    .await
-    .is_ok()
+    .await?;
+    Ok(())
 }
