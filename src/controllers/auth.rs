@@ -14,7 +14,7 @@ pub struct SignUpRequest {
 }
 
 #[derive(Serialize)]
-struct SignUpResponse {
+pub struct SignUpResponse {
     id: u64,
     first_name: String,
     last_name: String,

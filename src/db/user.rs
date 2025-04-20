@@ -1,4 +1,5 @@
-use crate::controllers::auth::SignUpRequest;
+use crate::controllers::auth::{SignUpRequest, SignUpResponse};
+
 
 pub async fn has_email(db: &sqlx::MySqlPool, email: &str) -> bool {
     sqlx::query!("SELECT * FROM users WHERE email = ?", email)
