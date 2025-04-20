@@ -31,7 +31,7 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     }
     db::user::create_user(&db, &data).await;
 
-    "Success".to_string();
+    "Success, User Information is added ".to_string();
 
     HttpResponse::Ok().json(SignUpResponse {
         id: 1, // Replace with actual ID generation logic
