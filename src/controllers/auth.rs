@@ -3,6 +3,7 @@ use actix_web::{
     HttpResponse, Responder, post,
     web::{self},
 };
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -32,7 +33,7 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     {
         return HttpResponse::BadRequest().body("email already exists");
     }
-    let email_regex = regex::Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
+    let email_regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
     if !email_regex.is_match(&data.email) {
         return HttpResponse::BadRequest().body("Invalid email format - Weka email poa");
     }
