@@ -29,7 +29,12 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     if db::user::has_email(&db, &data.email).await {
         return HttpResponse::BadRequest().body("email already exists");
     }
-    db::user::create_user(&db, &data).await;
+    let email_regex = regex::Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
+    if !email_regex.is_match(&data.email) {
+        return HttpResponse::BadRequest().body("Invalid email format - Weka email poa");
+    }
+
+    db::user::create_user(&db, &data).await.ok();
 
     "Success, User Information is added ".to_string();
 
