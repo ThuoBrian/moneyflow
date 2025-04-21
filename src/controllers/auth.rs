@@ -26,7 +26,10 @@ pub struct SignUpResponse {
 pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>) -> impl Responder {
     let db = state.db.lock().await;
 
-    if db::user::has_email(&db, &data.email).await {
+    if db::user::has_email(&db, &data.email)
+        .await
+        .expect("Database query failed")
+    {
         return HttpResponse::BadRequest().body("email already exists");
     }
     let email_regex = regex::Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();

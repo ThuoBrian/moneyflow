@@ -1,13 +1,14 @@
 use crate::controllers::auth::SignUpRequest;
 
-pub async fn has_email(db: &sqlx::MySqlPool, email: &str) -> bool {
-    sqlx::query("SELECT * FROM users WHERE email = ?")
+pub async fn has_email(db: &sqlx::MySqlPool, email: &str) -> Result<bool, sqlx::Error> {
+    let result = sqlx::query("SELECT 1 FROM users WHERE email = ? LIMIT 1")
         .bind(email)
         .fetch_optional(db)
-        .await
-        .map(|result| result.is_some())
-        .unwrap_or(false)
+        .await?;
+
+    Ok(result.is_some())
 }
+
 
 pub async fn create_user(
     db: &sqlx::MySqlPool,
