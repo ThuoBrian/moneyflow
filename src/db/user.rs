@@ -20,6 +20,11 @@ pub async fn create_user(
     if !email_regex.is_match(&userinfo.email) {
         return Err(sqlx::Error::Protocol("Invalid email format".into()));
     }
+    if userinfo.password.len() < 8 {
+        return Err(sqlx::Error::Protocol(
+            "Password must be at least 8 characters long".into(),
+        ));
+    }
     // const MIN_PASSWORD_LENGTH: usize = 10;
     // const SPECIAL_CHARS: &str = "!@#$%^&*()_+-=[]{}|;':\",.<>?/`~";
 

@@ -36,10 +36,16 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
 
     let email_regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
     if !email_regex.is_match(&data.email) {
-        return HttpResponse::BadRequest().body("Invalid email format - Weka email poa");
+        return HttpResponse::BadRequest().body("Invalid email format");
+    }
+    if data.password.len() < 8 {
+        return HttpResponse::BadRequest().body("Password must be at least 8 characters long");
     }
 
-    db::user::create_user(&db, &data).await.ok();
+    if db::user::create_user(&db, &data).await.ok().is_none() {
+        return HttpResponse::BadRequest().body("Failed to create user");
+    }
+
     "Success, User Information is added ".to_string();
 
     HttpResponse::Ok().json(SignUpResponse {
