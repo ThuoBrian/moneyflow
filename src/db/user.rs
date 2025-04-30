@@ -14,7 +14,9 @@ pub async fn create_user(
     db: &sqlx::MySqlPool,
     userinfo: &SignUpRequest,
 ) -> Result<(), sqlx::Error> {
-    let email_regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
+    const EMAIL_FORMAT_CHECK: &str = r"^[^\s@]+@[^\s@]+\.[^\s@]+$";
+
+    let email_regex = Regex::new(EMAIL_FORMAT_CHECK).unwrap();
     if !email_regex.is_match(&userinfo.email) {
         return Err(sqlx::Error::Protocol("Invalid email format".into()));
     }
