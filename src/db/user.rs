@@ -69,7 +69,6 @@ pub async fn create_user(
     // Encrypt the password only after all validations pass.
     let encrypted_password = bcrypt::hash(&userinfo.password, bcrypt::DEFAULT_COST)
         .map_err(|_| sqlx::Error::Protocol("Password hashing failed".into()))?;
-
     // Insert into the database only after all validations and encryption succeed
     sqlx::query!(
         "INSERT INTO users (`first_name`, `last_name`, `email`, `password`) VALUES (?, ?, ?, ?)",
