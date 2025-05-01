@@ -14,6 +14,7 @@ pub async fn create_user(
     db: &sqlx::MySqlPool,
     userinfo: &SignUpRequest,
 ) -> Result<(), sqlx::Error> {
+    // this regex checks for a valid email format.
     const EMAIL_FORMAT_CHECK: &str = r"^[^\s@]+@[^\s@]+\.[^\s@]+$";
 
     let email_regex = Regex::new(EMAIL_FORMAT_CHECK).unwrap();
@@ -65,7 +66,7 @@ pub async fn create_user(
         ));
     }
 
-    // Encrypt the password only after all validations pass
+    // Encrypt the password only after all validations pass.
     let encrypted_password = bcrypt::hash(&userinfo.password, bcrypt::DEFAULT_COST)
         .map_err(|_| sqlx::Error::Protocol("Password hashing failed".into()))?;
 
