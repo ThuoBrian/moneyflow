@@ -24,7 +24,7 @@ async fn main() -> std::io::Result<()> {
         db: Mutex::new(sqlx::MySqlPool::connect(&database_url).await.unwrap()),
     });
 
-    println!("Server running at http://127.0.0.1:8080");
+    println!("\n Server running at http://127.0.0.1:8080 \n");
 
     HttpServer::new(move || {
         App::new()
