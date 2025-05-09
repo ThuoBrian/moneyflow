@@ -5,6 +5,7 @@ use actix_web::{
 };
 use regex::Regex;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SignUpRequest {
@@ -31,7 +32,10 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
         .await
         .expect("Database query failed")
     {
-        return HttpResponse::BadRequest().body("email already exists");
+        return HttpResponse::UnprocessableEntity().json(json!({
+            "STATUS" : "Error",
+            "Message": "Email already exist."
+        }));
     }
 
     let email_regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
@@ -45,8 +49,10 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     if db::user::create_user(&db, &data).await.ok().is_none() {
         return HttpResponse::BadRequest().body("Failed to create user");
     }
-
-    "Success, User Information is added ".to_string();
+    HttpResponse::Created().json(json!({
+    "STATUS": "Success",
+    "Message" :"User Account created successfully."
+    }));
 
     HttpResponse::Ok().json(SignUpResponse {
         id: 1, // Replace with actual ID generation logic
