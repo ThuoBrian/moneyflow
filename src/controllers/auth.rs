@@ -33,43 +33,47 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
         .expect("Database query failed")
     {
         return HttpResponse::UnprocessableEntity().json(json!({
-            "STATUS" : "Error",
-            "Message": "Email already exist."
+            "STATUS": "Error",
+            "Message": "Email already exists."
         }));
     }
 
     let email_regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
     if !email_regex.is_match(&data.email) {
-        return HttpResponse::BadRequest().body("Invalid email format");
+        return HttpResponse::UnprocessableEntity().json(json!({
+            "STATUS": "Error",
+            "Message": "Invalid email format"
+        }));
     }
+
     if data.password.len() < 8 {
-        return HttpResponse::BadRequest().body("Password must be at least 8 characters long");
+        return HttpResponse::UnprocessableEntity().json(json!({
+            "STATUS": "Error",
+            "Message": "Password must be at least 8 characters long"
+        }));
     }
 
-    if db::user::create_user(&db, &data).await.ok().is_none() {
-        return HttpResponse::BadRequest().body("Failed to create user");
+    match db::user::create_user(&db, &data).await {
+        Ok(()) => {
+            HttpResponse::Created().json(SignUpResponse {
+                id: 1,
+                first_name: data.first_name.clone(),
+                last_name: data.last_name.clone(),
+                email: data.email.clone(),
+                password: data.password.clone(), // ideally don't return password
+            })
+        }
+        Err(e) => {
+            eprintln!("Error creating user: {:?}", e);
+            HttpResponse::UnprocessableEntity().json(json!({
+                "STATUS": "Error",
+                "Message": "Failed to create user"
+            }))
+        }
     }
-    HttpResponse::Created().json(json!({
-    "STATUS": "Success",
-    "Message" :"User Account created successfully."
-    }));
-
-    HttpResponse::Ok().json(SignUpResponse {
-        id: 1, // Replace with actual ID generation logic
-        first_name: data.first_name.clone(),
-        last_name: data.last_name.clone(),
-        email: data.email.clone(),
-        password: data.password.clone(),
-    })
 }
-
 #[post("/auth/signin")]
-pub async fn sign_in(data: web::Json<SignUpRequest>) -> impl Responder {
-    HttpResponse::Ok().json(SignUpResponse {
-        id: 1,
-        first_name: data.first_name.clone(),
-        last_name: data.last_name.clone(),
-        email: data.email.clone(),
-        password: data.password.clone(),
-    })
+
+pub async fn sign_in() -> impl Responder {
+    "Sign in endpoint"
 }
