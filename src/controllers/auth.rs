@@ -1,6 +1,6 @@
 use crate::{AppState, db};
 use actix_web::{
-    HttpResponse, Responder, post,
+    HttpResponse, Responder, get, post,
     web::{self},
 };
 use regex::Regex;
@@ -34,46 +34,67 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
     {
         return HttpResponse::UnprocessableEntity().json(json!({
             "STATUS": "Error",
-            "Message": "Email already exists."
+            "MESSAGE": "Email already exists."
         }));
     }
 
-    let email_regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
+    let email_regex: Regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
     if !email_regex.is_match(&data.email) {
         return HttpResponse::UnprocessableEntity().json(json!({
             "STATUS": "Error",
-            "Message": "Invalid email format"
+            "MESSAGE": "Invalid email format"
         }));
     }
 
     if data.password.len() < 8 {
         return HttpResponse::UnprocessableEntity().json(json!({
             "STATUS": "Error",
-            "Message": "Password must be at least 8 characters long"
+            "MESSAGE": "Password must be at least 8 characters long"
         }));
     }
 
     match db::user::create_user(&db, &data).await {
-        Ok(()) => {
-            HttpResponse::Created().json(SignUpResponse {
-                id: 1,
-                first_name: data.first_name.clone(),
-                last_name: data.last_name.clone(),
-                email: data.email.clone(),
-                password: data.password.clone(), // ideally don't return password
-            })
-        }
+        Ok(()) => HttpResponse::Created().json(SignUpResponse {
+            id: 1,
+            first_name: data.first_name.clone(),
+            last_name: data.last_name.clone(),
+            email: data.email.clone(),
+            password: data.password.clone(),
+        }),
         Err(e) => {
             eprintln!("Error creating user: {:?}", e);
             HttpResponse::UnprocessableEntity().json(json!({
                 "STATUS": "Error",
-                "Message": "Failed to create user"
+                "MESSAGE": "Failed to create user"
             }))
         }
     }
 }
-#[post("/auth/signin")]
 
-pub async fn sign_in() -> impl Responder {
+#[derive(Deserialize, Debug)]
+pub struct SignInRequest {
+    pub email: String,
+    pub password: String,
+}
+
+#[post("/auth/signin")]
+pub async fn sign_in(state: web::Data<AppState>, data: web::Json<SignInRequest>) -> impl Responder {
+    let db = state.db.lock().await;
+
     "Sign in endpoint"
 }
+
+// #[get("/auth/getuser/{id}")]
+// pub async fn get_user_email(state: web::Data<AppState>, id: web::Path<u64>) -> impl Responder {
+//     let db = state.db.lock().await;
+//     // to create a get user endpoint
+
+//     let user = db::user::get_user_by_email(&db, &email).await;
+//     match user {
+//         Ok(user) => HttpResponse::Ok().json(user),
+//         Err(e) => {
+//             eprintln!("Error fetching user: {:?}", e);
+//             HttpResponse::UnprocessableEntity().finish()
+//         }
+//     }
+// }

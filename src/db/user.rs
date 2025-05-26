@@ -81,3 +81,25 @@ pub async fn create_user(
     .await?;
     Ok(())
 }
+// pub struct User {
+//     pub id: u64,
+//     pub first_name: String,
+//     pub last_name: String,
+//     pub email: String,
+//     pub password: String,n 
+// }
+
+// pub async fn get_user_by_email(
+//     db: &sqlx::MySqlPool,
+//     user_email: String,
+// ) -> Result<User, sqlx::Error> {
+//     let user = sqlx::query_as!(
+//         User,
+//         "SELECT id, first_name, last_name, email, password FROM users WHERE  email = ?",
+//         user_email
+//     )
+//     .fetch_one(db)
+//     .await?;
+
+//     Ok(user)
+// }
