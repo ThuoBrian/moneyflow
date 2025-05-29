@@ -1,5 +1,6 @@
 use crate::controllers::auth::SignUpRequest;
 use regex::Regex;
+use sqlx::types::chrono;
 
 pub async fn has_email(db: &sqlx::MySqlPool, email: &str) -> Result<bool, sqlx::Error> {
     let result = sqlx::query("SELECT 1 FROM users WHERE email = ? LIMIT 1")
@@ -66,7 +67,6 @@ pub async fn create_user(
         ));
     }
 
-    // Encrypt the password only after all validations pass.
     let encrypted_password = bcrypt::hash(&userinfo.password, bcrypt::DEFAULT_COST)
         .map_err(|_| sqlx::Error::Protocol("Password hashing failed".into()))?;
     // Insert into the database only after all validations and encryption succeed
@@ -81,25 +81,20 @@ pub async fn create_user(
     .await?;
     Ok(())
 }
-// pub struct User {
-//     pub id: u64,
-//     pub first_name: String,
-//     pub last_name: String,
-//     pub email: String,
-//     pub password: String,n 
-// }
+pub struct User {
+    pub id: u64,
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub password: String,
+    pub balance: u64,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
 
-// pub async fn get_user_by_email(
-//     db: &sqlx::MySqlPool,
-//     user_email: String,
-// ) -> Result<User, sqlx::Error> {
-//     let user = sqlx::query_as!(
-//         User,
-//         "SELECT id, first_name, last_name, email, password FROM users WHERE  email = ?",
-//         user_email
-//     )
-//     .fetch_one(db)
-//     .await?;
-
-//     Ok(user)
-// }
+pub async fn get_user_by_email(db: &sqlx::MySqlPool, user_email: String,) -> Option<User> {
+    sqlx::query_as!( User, "SELECT * FROM users WHERE  email = ?", user_email)
+    .fetch_optional(db)
+    .await
+    .unwrap()
+}
