@@ -3,7 +3,7 @@ use actix_web::{
     HttpResponse, Responder, post,
     web::{self},
 };
-use bcrypt::verify;
+// use bcrypt::verify;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -37,6 +37,23 @@ pub async fn sign_up(state: web::Data<AppState>, data: web::Json<SignUpRequest>)
             "STATUS": "Error",
             "MESSAGE": "Email already exists."
         }));
+    }
+
+    // Check if username exists
+    match db::user::does_username_exist(&db, &data.first_name, &data.last_name).await {
+        Ok(_) => (), // Username doesn't exist, continue with signup
+        Err(e) => {
+            if let sqlx::Error::Protocol(_) = e {
+                return HttpResponse::UnprocessableEntity().json(json!({
+                    "STATUS": "Error",
+                    "MESSAGE": "The USERNAME already exists."
+                }));
+            }
+            return HttpResponse::InternalServerError().json(json!({
+                "STATUS": "Error",
+                "MESSAGE": "Failed to check username existence"
+            }));
+        }
     }
 
     let email_regex: Regex = Regex::new(r"^[^\s@]+@[^\s@]+\.[^\s@]+$").unwrap();
@@ -100,18 +117,3 @@ pub async fn sign_in(state: web::Data<AppState>, data: web::Json<SignInRequest>)
         "MESSAGE": "Sign in successful"
     }))
 }
-
-// #[get("/auth/getuser/{id}")]
-// pub async fn get_user_email(state: web::Data<AppState>, id: web::Path<u64>) -> impl Responder {
-//     let db = state.db.lock().await;
-//     // to create a get user endpoint
-
-//     let user = db::user::get_user_by_email(&db, &email).await;
-//     match user {
-//         Ok(user) => HttpResponse::Ok().json(user),
-//         Err(e) => {
-//             eprintln!("Error fetching user: {:?}", e);
-//             HttpResponse::UnprocessableEntity().finish()
-//         }
-//     }
-// }

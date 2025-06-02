@@ -11,6 +11,23 @@ pub async fn has_email(db: &sqlx::MySqlPool, email: &str) -> Result<bool, sqlx::
     Ok(result.is_some())
 }
 
+pub async fn does_username_exist(
+    db: &sqlx::MySqlPool,
+    f_name: &str,
+    l_name: &str,
+) -> Result<bool, sqlx::Error> {
+    let result = sqlx::query("SELECT 1 FROM users WHERE first_name = ? AND last_name = ? LIMIT 1")
+        .bind(f_name)
+        .bind(l_name)
+        .fetch_optional(db)
+        .await?;
+
+    if result.is_some() {
+        return Err(sqlx::Error::Protocol("Username already exists".into()));
+    }
+    Ok(false)
+}
+
 pub async fn create_user(
     db: &sqlx::MySqlPool,
     userinfo: &SignUpRequest,
@@ -81,6 +98,8 @@ pub async fn create_user(
     .await?;
     Ok(())
 }
+
+#[warn(dead_code)]
 pub struct User {
     pub id: u64,
     pub first_name: String,
@@ -92,9 +111,9 @@ pub struct User {
     pub updated_at: chrono::NaiveDateTime,
 }
 
-pub async fn get_user_by_email(db: &sqlx::MySqlPool, user_email: String,) -> Option<User> {
-    sqlx::query_as!( User, "SELECT * FROM users WHERE  email = ?", user_email)
-    .fetch_optional(db)
-    .await
-    .unwrap()
+pub async fn get_user_by_email(db: &sqlx::MySqlPool, user_email: String) -> Option<User> {
+    sqlx::query_as!(User, "SELECT * FROM users WHERE  email = ?", user_email)
+        .fetch_optional(db)
+        .await
+        .unwrap()
 }

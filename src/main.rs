@@ -15,7 +15,6 @@ pub struct AppState {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // Load environment variables from .env file
-    // Why? it helps to keep sensitive data out of your codebase.
     dotenv().ok();
 
     let database_url = env::var("DATABASE_URL").expect("Check your db path config `DATABASE_URL`");
@@ -25,6 +24,7 @@ async fn main() -> std::io::Result<()> {
     });
 
     println!("\n Server running at http://127.0.0.1:8080 \n");
+
 
     HttpServer::new(move || {
         App::new()
